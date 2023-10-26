@@ -66,11 +66,12 @@ namespace DataBase
             }
             return true;
         }
+
         public bool UpdateUser(IUser user)
         {
             try
             {
-                var dbUser = _myDbContext.Users.FirstOrDefault(x => x.Id == user.Id);
+                var dbUser = _myDbContext.Users.Include(x => x.Address).FirstOrDefault(x => x.Id == user.Id);
                 if (dbUser == null)
                 {
                     return false;
@@ -78,24 +79,24 @@ namespace DataBase
                 dbUser.Name = user.Name;
                 dbUser.Age = user.Age;
                 dbUser.Password = user.Password;
+
                 if (user.Address != null)
                 {
-                    var dbAddress = _myDbContext.Addresses.FirstOrDefault(x => x.Id == user.Address.Id);
-                    if (dbAddress != null && dbAddress.Id != 0)
+                    if (dbUser.Address != null)
                     {
-                        dbAddress.Street = user.Address.Street;
-                        dbAddress.City = user.Address.City;
-                        dbAddress.Index = user.Address.Index;
-                        dbAddress.Country = user.Address.Country;
+                        dbUser.Address.Street = user.Address.Street;
+                        dbUser.Address.City = user.Address.City;
+                        dbUser.Address.Index = user.Address.Index;
+                        dbUser.Address.Country = user.Address.Country;
                     }
                     else
                     {
-                        dbUser.Address = new Models.Address
+                        dbUser.Address = new Models.Address()
                         {
                             Street = user.Address.Street,
                             City = user.Address.City,
                             Index = user.Address.Index,
-                            Country = user.Address.Country,
+                            Country = user.Address.Country
                         };
                     }
                 }
@@ -108,6 +109,7 @@ namespace DataBase
             }
             return true;
         }
+
 
         public IUser GetUserByEmail(string email)
         {

@@ -1,6 +1,8 @@
-﻿using Core.Interface;
+﻿using Core.Entities;
+using Core.Interface;
 using Core.Interface.Repository;
 using Core.Interface.Service;
+using System.Reflection;
 
 namespace Core.Service
 {
@@ -22,13 +24,45 @@ namespace Core.Service
             user.CreateDate = DateTime.Now;
             return userRepository.CreateUser(user);
         }
+
         public bool UpdateUser(IUser user)
         {
+            var userFromDb = userRepository.GetUserById(user.Id);
+            if (userFromDb == null)
+            {
+                return false;
+            }
+            userFromDb.Name = user.Name;
+            userFromDb.Age = user.Age;
+            userFromDb.Password = user.Password;
+
+            if (user.Address != null)
+            {
+                if (userFromDb.Address != null)
+                {
+                    userFromDb.Address.Street = user.Address.Street;
+                    userFromDb.Address.City = user.Address.City;
+                    userFromDb.Address.Index = user.Address.Index;
+                    userFromDb.Address.Country = user.Address.Country;
+                }
+                else
+                {
+                    userFromDb.Address = new Address
+                    {
+                        Street = user.Address.Street,
+                        City = user.Address.City,
+                        Index = user.Address.Index,
+                        Country = user.Address.Country
+                    };
+                }
+            }
+
             return userRepository.UpdateUser(user);
         }
+
         public bool IsUsedEmail(string email)
         {
-            if(userRepository.GetUserByEmail(email) == null)
+            if (userRepository.GetUserByEmail(email) == null)
             {
                 return false;
             }

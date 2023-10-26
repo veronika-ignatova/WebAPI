@@ -6,11 +6,14 @@ using DataBase;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using WebAPI.Helpers.Attributes;
+using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ValidateModel]
     public class UserController : Controller
     {
         private readonly IUserService _userService;
@@ -37,17 +40,25 @@ namespace WebAPI.Controllers
             return _userService.GetUserByEmail(email);
         }
 
-        [HttpPatch("Update/{id}")]
-        public bool UpdateUserById([FromRoute] Guid id, [FromBody] string? name, int? age, string? password)
+        [HttpPut("Update")]
+        public bool UpdateUser([FromBody] UserApiModel user)
         {
-            var user = new User()
+            var iUser = new User()
             {
-                Id = id,
-                Name = name,
-                Age = age,
-                Password = password
+                Id = user.Id,
+                Name = user.Name,
+                Age = user.Age,
+                Password = user.Password,
+                Address = user.Address != null ? new Address()
+                {
+                    City = user.Address.City,
+                    Country = user.Address.Country,
+                    Index = user.Address.Index,
+                    Street = user.Address.Street
+                } : null,
             };
-            return _userService.UpdateUser(user);
+
+            return _userService.UpdateUser(iUser);
         }
     }
 }

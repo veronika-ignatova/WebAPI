@@ -3,12 +3,27 @@ using Core.Interface.Service;
 using Core.Service;
 using DataBase;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mime;
+using WebAPI.Helpers;
+using WebAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var result = new ValidationFailedResult(context.ModelState);
 
-builder.Services.AddControllers();
+        // TODO: add `using System.Net.Mime;` to resolve MediaTypeNames
+        result.ContentTypes.Add(MediaTypeNames.Application.Json);
+        result.ContentTypes.Add(MediaTypeNames.Application.Xml);
+
+        return result;
+    };
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
